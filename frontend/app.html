@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Gestión</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+  <div class="app-shell" id="appShell">
+
+    <!-- ============================= SIDEBAR ============================= -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="login-brand-mark" id="brandMark">PG</div>
+        <span class="sidebar-brand-text" style="color:#fff; font-weight:700; font-size:14px;">Panel de Gestión</span>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebarNav">
+        <!-- Los ítems se generan por JS según los permisos del usuario -->
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="avatar" id="avatarIniciales">--</div>
+        <div class="user-meta">
+          <div class="user-name" id="nombreUsuario">Usuario</div>
+          <div class="user-role" id="rolUsuario">Rol</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============================= CONTENIDO ============================= -->
+    <div>
+      <header class="topbar">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <button class="btn-plain" id="btnToggleSidebar" aria-label="Colapsar menú">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          </button>
+          <h1 class="topbar-title" id="tituloVista">Dashboard</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-plain" id="btnSincronizar" title="Sincronizar datos con Google Sheets">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            <span style="font-size:12.5px; font-weight:600;">Sincronizar</span>
+          </button>
+          <button class="btn-plain" id="btnLogout" aria-label="Cerrar sesión" title="Cerrar sesión">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+
+        <!-- ======================= VISTA: DASHBOARD ======================= -->
+        <section class="view active" id="view-dashboard">
+          <div class="kpi-grid" id="kpiGrid">
+            <!-- KPIs generados por JS -->
+          </div>
+
+          <div class="grid-2col">
+            <div class="card">
+              <div class="card-header"><h3>Registros por labor</h3></div>
+              <div class="card-body"><canvas id="chartLabores" height="220"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Últimos registros</h3></div>
+              <div class="card-body" style="padding:0;">
+                <table class="data-table" id="tablaUltimos">
+                  <thead><tr><th>Fecha</th><th>Variedad</th><th>Labor</th><th>Estado</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================= VISTA: REGISTROS (CRUD ejemplo) ======================= -->
+        <section class="view" id="view-registros">
+          <div class="card">
+            <div class="card-header">
+              <h3>Historial de registros</h3>
+              <div style="display:flex; gap:8px;">
+                <input type="file" id="inputImportar" accept=".xlsx,.xls" style="display:none;">
+                <button class="btn btn-secondary" id="btnImportar">Importar Excel</button>
+                <button class="btn btn-secondary" id="btnExportar">Exportar Excel</button>
+                <button class="btn btn-primary" id="btnNuevoRegistro">+ Nuevo registro</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-toolbar">
+                <div class="table-search">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                  <input type="text" class="form-control" id="inputBuscar" placeholder="Buscar en todos los campos...">
+                </div>
+              </div>
+
+              <div style="overflow-x:auto;">
+                <table class="data-table" id="tablaRegistros">
+                  <thead>
+                    <tr>
+                      <th data-campo="Fecha">Fecha</th>
+                      <th data-campo="Variedad">Variedad</th>
+                      <th data-campo="Labor">Labor</th>
+                      <th data-campo="Responsable">Responsable</th>
+                      <th data-campo="Cantidad">Cantidad</th>
+                      <th data-campo="Estado">Estado</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <div class="pagination">
+                <span id="paginacionInfo">Mostrando 0 de 0 registros</span>
+                <div class="pagination-buttons" id="paginacionBotones"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================= VISTA: CONFIGURACIÓN (placeholder) ======================= -->
+        <section class="view" id="view-configuracion">
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-body" style="padding:12px 20px; display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="subtab-btn active" data-subtab="usuarios">Usuarios</button>
+              <button class="subtab-btn" data-subtab="roles">Roles</button>
+              <button class="subtab-btn" data-subtab="permisos">Permisos</button>
+              <button class="subtab-btn" data-subtab="catalogos">Catálogos</button>
+            </div>
+          </div>
+
+          <!-- SUB-VISTA: USUARIOS -->
+          <div class="subview active" id="subview-usuarios">
+            <div class="card">
+              <div class="card-header">
+                <h3>Usuarios</h3>
+                <button class="btn btn-primary" id="btnNuevoUsuario">+ Nuevo usuario</button>
+              </div>
+              <div class="card-body" style="padding:0;">
+                <table class="data-table" id="tablaUsuarios">
+                  <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th></th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-VISTA: ROLES -->
+          <div class="subview" id="subview-roles">
+            <div class="card">
+              <div class="card-header">
+                <h3>Roles</h3>
+                <button class="btn btn-primary" id="btnNuevoRol">+ Nuevo rol</button>
+              </div>
+              <div class="card-body" style="padding:0;">
+                <table class="data-table" id="tablaRoles">
+                  <thead><tr><th>Rol</th><th>Descripción</th><th></th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-VISTA: PERMISOS -->
+          <div class="subview" id="subview-permisos">
+            <div class="card">
+              <div class="card-header"><h3>Permisos por rol</h3></div>
+              <div class="card-body">
+                <p style="color:var(--color-text-muted); font-size:13px; margin-bottom:16px;">
+                  Los cambios de permisos aplican la próxima vez que cada usuario inicie sesión
+                  (los permisos quedan guardados en el token de sesión, no se revisan en cada clic).
+                </p>
+                <div class="form-group" style="max-width:280px;">
+                  <label class="form-label" for="selectRolPermisos">Selecciona un rol</label>
+                  <select id="selectRolPermisos" class="form-control"></select>
+                </div>
+                <div id="matrizPermisos" style="margin-top:16px;"></div>
+                <button class="btn btn-primary" id="btnGuardarPermisos" style="margin-top:16px;" disabled>Guardar permisos</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-VISTA: CATÁLOGOS -->
+          <div class="subview" id="subview-catalogos">
+            <div class="grid-2col">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Variedades</h3>
+                  <button class="btn btn-primary" id="btnNuevaVariedad">+ Agregar</button>
+                </div>
+                <div class="card-body" style="padding:0;">
+                  <table class="data-table" id="tablaVariedades">
+                    <thead><tr><th>Nombre</th><th>Estado</th><th></th></tr></thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header">
+                  <h3>Labores</h3>
+                  <button class="btn btn-primary" id="btnNuevaLabor">+ Agregar</button>
+                </div>
+                <div class="card-body" style="padding:0;">
+                  <table class="data-table" id="tablaLabores">
+                    <thead><tr><th>Nombre</th><th>Estado</th><th></th></tr></thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+      </main>
+    </div>
+
+  </div>
+
+  <!-- ============================= MODAL: CREAR / EDITAR REGISTRO ============================= -->
+  <div class="modal-overlay" id="modalRegistro">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalRegistroTitulo">Nuevo registro</h3>
+        <button class="btn-plain" id="btnCerrarModal">✕</button>
+      </div>
+      <form id="formRegistro">
+        <div class="modal-body">
+          <div id="alertModal"></div>
+          <input type="hidden" id="campo_fila">
+          <input type="hidden" id="campo_id">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="campo_fecha">Fecha *</label>
+              <input type="date" id="campo_fecha" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="campo_variedad">Variedad *</label>
+              <select id="campo_variedad" class="form-control" required></select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="campo_labor">Labor *</label>
+              <select id="campo_labor" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="campo_estado">Estado *</label>
+              <select id="campo_estado" class="form-control" required></select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="campo_responsable">Responsable *</label>
+              <input type="text" id="campo_responsable" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="campo_cantidad">Cantidad</label>
+              <input type="number" step="0.01" id="campo_cantidad" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="campo_observaciones">Observaciones</label>
+            <input type="text" id="campo_observaciones" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelarModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnGuardarRegistro">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================= MODAL: CONFIRMAR (genérico, reutilizado por todos los módulos) ============================= -->
+  <div class="modal-overlay" id="modalConfirmar">
+    <div class="modal" style="max-width:380px;">
+      <div class="modal-header"><h3>Confirmar</h3></div>
+      <div class="modal-body">
+        <p id="mensajeConfirmar">¿Seguro que deseas continuar? Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelarEliminar">Cancelar</button>
+        <button class="btn btn-danger" id="btnConfirmarEliminar">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= MODAL: CREAR / EDITAR USUARIO ============================= -->
+  <div class="modal-overlay" id="modalUsuario">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalUsuarioTitulo">Nuevo usuario</h3>
+        <button class="btn-plain" id="btnCerrarModalUsuario">✕</button>
+      </div>
+      <form id="formUsuario">
+        <div class="modal-body">
+          <div id="alertModalUsuario"></div>
+          <input type="hidden" id="usr_fila">
+          <div class="form-group">
+            <label class="form-label" for="usr_usuario">Usuario *</label>
+            <input type="text" id="usr_usuario" class="form-control" required autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="usr_nombre">Nombre completo *</label>
+            <input type="text" id="usr_nombre" class="form-control" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="usr_rol">Rol *</label>
+              <select id="usr_rol" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="usr_estado">Estado *</label>
+              <select id="usr_estado" class="form-control" required>
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" id="grupoPasswordUsuario">
+            <label class="form-label" for="usr_password">Contraseña inicial *</label>
+            <input type="password" id="usr_password" class="form-control" minlength="6" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelarModalUsuario">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================= MODAL: RESTABLECER CONTRASEÑA ============================= -->
+  <div class="modal-overlay" id="modalResetPassword">
+    <div class="modal" style="max-width:380px;">
+      <div class="modal-header">
+        <h3>Restablecer contraseña</h3>
+        <button class="btn-plain" id="btnCerrarModalReset">✕</button>
+      </div>
+      <form id="formResetPassword">
+        <div class="modal-body">
+          <div id="alertModalReset"></div>
+          <div class="form-group">
+            <label class="form-label" for="reset_password">Nueva contraseña *</label>
+            <input type="password" id="reset_password" class="form-control" minlength="6" required autocomplete="new-password">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelarModalReset">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Restablecer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================= MODAL: CREAR / EDITAR ROL ============================= -->
+  <div class="modal-overlay" id="modalRol">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalRolTitulo">Nuevo rol</h3>
+        <button class="btn-plain" id="btnCerrarModalRol">✕</button>
+      </div>
+      <form id="formRol">
+        <div class="modal-body">
+          <div id="alertModalRol"></div>
+          <input type="hidden" id="rol_fila">
+          <div class="form-group">
+            <label class="form-label" for="rol_nombre">Nombre del rol *</label>
+            <input type="text" id="rol_nombre" class="form-control" required autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="rol_descripcion">Descripción</label>
+            <input type="text" id="rol_descripcion" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelarModalRol">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================= MODAL: CREAR / EDITAR ÍTEM DE CATÁLOGO (Variedad o Labor) ============================= -->
+  <div class="modal-overlay" id="modalCatalogo">
+    <div class="modal" style="max-width:380px;">
+      <div class="modal-header">
+        <h3 id="modalCatalogoTitulo">Nuevo ítem</h3>
+        <button class="btn-plain" id="btnCerrarModalCatalogo">✕</button>
+      </div>
+      <form id="formCatalogo">
+        <div class="modal-body">
+          <div id="alertModalCatalogo"></div>
+          <div class="form-group">
+            <label class="form-label" for="cat_nombre">Nombre *</label>
+            <input type="text" id="cat_nombre" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cat_estado">Estado *</label>
+            <select id="cat_estado" class="form-control" required>
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelarModalCatalogo">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/configuracion.js"></script>
+</body>
+</html>

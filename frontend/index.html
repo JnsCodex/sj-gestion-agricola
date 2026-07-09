@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión · Panel de Gestión</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="login-brand-mark">PG</div>
+        <div>
+          <div class="login-brand-name">Panel de Gestión</div>
+          <div class="login-brand-sub">Herramienta interna</div>
+        </div>
+      </div>
+
+      <h1 class="login-title">Iniciar sesión</h1>
+      <p class="login-subtitle">Ingresa tus credenciales para continuar</p>
+
+      <div id="alertBox"></div>
+
+      <form id="formLogin" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="usuario">Usuario</label>
+          <input type="text" id="usuario" class="form-control" autocomplete="username" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Contraseña</label>
+          <div class="input-password-wrap">
+            <input type="password" id="password" class="form-control" autocomplete="current-password" required>
+            <button type="button" class="btn-toggle-password" id="btnTogglePassword" aria-label="Mostrar u ocultar contraseña">
+              <svg id="iconEye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-check">
+          <input type="checkbox" id="recordarSesion">
+          <label for="recordarSesion">Recordar mi sesión en este dispositivo</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="btnLogin">
+          <span id="btnLoginText">Ingresar</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+    // Si venimos de una sesión expirada, avisamos al usuario
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('expirada') === '1') {
+      mostrarAlerta('Tu sesión expiró. Vuelve a iniciar sesión.', 'warning');
+    }
+
+    // Si ya hay una sesión activa, saltamos directo al panel
+    if (Api.getToken()) {
+      window.location.href = 'app.html';
+    }
+
+    document.getElementById('btnTogglePassword').addEventListener('click', function () {
+      const input = document.getElementById('password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    });
+
+    document.getElementById('formLogin').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const usuario = document.getElementById('usuario').value.trim();
+      const password = document.getElementById('password').value;
+      const recordar = document.getElementById('recordarSesion').checked;
+
+      if (!usuario || !password) {
+        mostrarAlerta('Usuario y contraseña son obligatorios.', 'danger');
+        return;
+      }
+
+      establecerCargando(true);
+      try {
+        await Auth.login(usuario, password, recordar);
+        window.location.href = 'app.html';
+      } catch (err) {
+        mostrarAlerta(err.message, 'danger');
+      } finally {
+        establecerCargando(false);
+      }
+    });
+
+    function establecerCargando(cargando) {
+      document.getElementById('loadingOverlay').classList.toggle('active', cargando);
+      document.getElementById('btnLogin').disabled = cargando;
+      document.getElementById('btnLoginText').textContent = cargando ? 'Ingresando...' : 'Ingresar';
+    }
+
+    function mostrarAlerta(mensaje, tipo) {
+      document.getElementById('alertBox').innerHTML =
+        '<div class="alert alert-' + tipo + '">' + mensaje + '</div>';
+    }
+  </script>
+</body>
+</html>
